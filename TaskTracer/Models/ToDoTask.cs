@@ -7,7 +7,7 @@ public class ToDoTask
     public string Description { get; set; }
      public DateTime StartDate { get; set; }
      public string EstimatedTime { get; set; }
-     public DateTime DueTime { get; set; }
+     public DateTime DueDate { get; set; }
      public string Priority { get; set; }
      public string Status { get; set; }
      public string PID { get; set; } 
