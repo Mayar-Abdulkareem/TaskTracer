@@ -1,6 +1,5 @@
 using TaskTracer.DataAccessor;
 using TaskTracer.Models;
-using Task = System.Threading.Tasks.Task;
 
 namespace TaskTracer.Storage;
 
@@ -28,8 +27,15 @@ public class StorageFactory
         projects.Add(key, project);
     }
 
+    public void AddTask(ToDoTask task)
+    {
+        string key = Guid.NewGuid().ToString();
+        task.ID = key;
+        tasks.Add(key, task);
+    }
+
     public override string ToString()
     {
-        return projects.ToString();
+        return "Projects:\n" + projects.ToString() + "Tasks:\n" + tasks.ToString();
     }
 }

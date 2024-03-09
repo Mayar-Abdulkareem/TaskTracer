@@ -1,5 +1,6 @@
 using System.Reflection;
 using TaskTracer.DataAccessor;
+using TaskTracer.Enums;
 using TaskTracer.Models;
 using TaskTracer.Storage;
 using TaskTracer.UserInput;
@@ -23,27 +24,35 @@ public class Application
     {
         storage.Load();
         _userInput.ShowMenu();
-        RunCommand(_userInput.ReadCommand());
+        RunCommand();
     }
 
-    private void RunCommand(string line)
+    private void RunCommand()
     {
-        var parsedCommand = _userInput.ParseCommand(line);
-        var command = parsedCommand.Command;
-        var parameters = parsedCommand.Parameters;
-        
-        switch (command)
+        bool isValid = true;
+        while (isValid)
         {
-            case "show-menu":
-                _userInput.ShowMenu();
-                break;
-            case "add-project":
-                var project = CreateProject(parameters);
-                storage.AddProject(project);
-                Console.WriteLine(storage.ToString());
-                break;
-            case "add-task":
-                break;
+            string line = _userInput.ReadCommand();
+            var parsedCommand = _userInput.ParseCommand(line);
+            var command = parsedCommand.Command;
+            var parameters = parsedCommand.Parameters;
+        
+            switch (command)
+            {
+                case "show-menu":
+                    _userInput.ShowMenu();
+                    break;
+                case "add-project":
+                    var project = CreateProject(parameters);
+                    storage.AddProject(project);
+                    Console.WriteLine(storage.ToString());
+                    break;
+                case "add-task":
+                    break;
+                case "stop":
+                    isValid = false;
+                    break;
+            }
         }
     }
 
@@ -78,4 +87,47 @@ public class Application
 
         return project;
     }
+    //
+    // ToDoTask CreateTask(Dictionary<string, string> parameters)
+    // {
+    //     ToDoTask task = new ToDoTask();
+    //
+    //     foreach (var param in parameters)
+    //     {
+    //         var propertyInfo = typeof(ToDoTask).GetProperty(param.Key);
+    //         if (propertyInfo != null)
+    //         {
+    //             if (param.Key == "Status")
+    //             {
+    //                 switch (param.Value)
+    //                 {
+    //                     case MyTaskStatus.NotStarted:
+    //                         propertyInfo.SetValue(task, "NotStarted");
+    //                         break;
+    //                     case MyTaskStatus.InProgress:
+    //                         propertyInfo.SetValue(task, "InProgress");
+    //                         break;
+    //                     
+    //                 }
+    //             }
+    //             if (propertyInfo.PropertyType == typeof(DateTime))
+    //             {
+    //                 if (DateTime.TryParse(param.Value, out DateTime dateTimeValue))
+    //                 {
+    //                     propertyInfo.SetValue(task, dateTimeValue);
+    //                 }
+    //                 else
+    //                 {
+    //                     Console.WriteLine($"Invalid format for property {param.Key}");
+    //                 }
+    //             }
+    //             else if (propertyInfo.PropertyType == typeof(string))
+    //             {
+    //                 propertyInfo.SetValue(task, param.Value);
+    //             }
+    //         }
+    //     }
+    //
+    //     return task;
+    // }
 }

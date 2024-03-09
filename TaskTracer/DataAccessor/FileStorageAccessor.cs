@@ -12,11 +12,16 @@ public class FileStorageAccessor(string fileDirectoryPath) : IDataStorageAccesso
     {
         var filePath = Path.Combine(_fileDirectoryPath, fileType.ToString() + ".csv");
 
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture);
+        Dictionary<string, T> dictionary;
+        
         using var reader = new StreamReader(filePath);
-        using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
+        using var csv = new CsvReader(reader, config);
+        csv.Context.RegisterClassMap<ToDoTaskMap>();
         var records = csv.GetRecords<T>().ToList();
 
-        var dictionary = records.ToDictionary(record =>
+
+        dictionary = records.ToDictionary(record =>
         {
             var idProperty = typeof(T).GetProperty("ID");
             if (idProperty == null)
@@ -32,7 +37,6 @@ public class FileStorageAccessor(string fileDirectoryPath) : IDataStorageAccesso
 
             return idValue;
         });
-
         return dictionary;
     }
 }

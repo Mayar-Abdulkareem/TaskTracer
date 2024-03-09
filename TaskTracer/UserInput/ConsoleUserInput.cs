@@ -9,6 +9,7 @@ public class ConsoleUserInput : IUserInput
         Console.WriteLine("""
             Task Tracer Commands:
             show-menu
+            stop
             add-project Title=value, DueDate=value
             add-task Title=value, Description=value, StartDate=yyyy-mm-dd, EstimatedTime=value, DueDate=yyyy-mm-dd,Priority= <High, Medium or low>,Status=<Not Started, In Progress or Completed>
             ******************************
