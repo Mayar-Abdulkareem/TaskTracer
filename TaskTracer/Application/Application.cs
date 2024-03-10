@@ -1,6 +1,4 @@
-using System.Reflection;
 using TaskTracer.DataAccessor;
-using TaskTracer.Models;
 using TaskTracer.Storage;
 using TaskTracer.UserInput;
 
@@ -17,7 +15,7 @@ public class Application
     {
         _dataStorageAccessor = dataStorageAccessor;
         _userInput = userInput;
-        storage = new StorageRepository(_dataStorageAccessor);
+        storage = new StorageRepository(_dataStorageAccessor, _userInput);
     }
 
     public void Run()
@@ -51,6 +49,42 @@ public class Application
                     var task = factory.CreateTask(parameters);
                     storage.AddTask(task);
                     _userInput.ShowSuccessMessage($"Task with {task.ToString()} added successfully");
+                    break;
+                case "display-projects":
+                    storage.DisplayProjects();
+                    break;
+                case "display-tasks":
+                    storage.DisplayTasks();
+                    break;
+                case "edit-project":
+                    string id = parameters["ID".Trim().ToLower()];
+                    var projectWithUpdate = storage.FindProjectById(id);
+                    if (projectWithUpdate != null)
+                    {
+                        parameters.Remove("ID");
+                        var projectAfterUpdate = factory.CreateProjectWithUpdate(parameters, projectWithUpdate);
+                        storage.EditProject(id, projectWithUpdate);
+                        _userInput.ShowSuccessMessage($"Project with {projectWithUpdate.ToString()} updated successfully");
+                    }
+                    else
+                    {
+                        _userInput.ShowError("ID not found");
+                    }
+                    break;
+                case "edit-task":
+                    string key = parameters["ID".Trim().ToLower()];
+                    var taskWithUpdate = storage.FindTaskById(key);
+                    if (taskWithUpdate != null)
+                    {
+                        parameters.Remove("ID");
+                        taskWithUpdate = factory.CreateTaskWithUpdate(parameters, taskWithUpdate);
+                        storage.EditTask(key, taskWithUpdate);
+                        _userInput.ShowSuccessMessage($"Task with {taskWithUpdate.ToString()} updated successfully");
+                    }
+                    else
+                    {
+                        _userInput.ShowError("ID not found");
+                    }
                     break;
                 case "stop":
                     isValid = false;

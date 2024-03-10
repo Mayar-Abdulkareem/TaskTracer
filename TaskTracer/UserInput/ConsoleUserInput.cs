@@ -1,4 +1,6 @@
+using TaskTracer.Models;
 using TaskTracer.ParsesCommand;
+using TaskTracer.Storage;
 
 namespace TaskTracer.UserInput;
 
@@ -13,9 +15,17 @@ public class ConsoleUserInput : IUserInput
             stop
             add-project Title=value, DueDate=value
             add-task Title=value, Description=value, StartDate=yyyy-mm-dd, EstimatedTime=value, DueDate=yyyy-mm-dd,Priority= <High, Medium or low>,Status=<Not Started, In Progress or Completed>
-            edit-project Title=value
+            display-projects
+            display-tasks
+            edit-project ID=value, parameter1=value, parameter2=value, ... etc
+            edit-task ID=value, parameter1=value, parameter2=value, ... etc
             ******************************
             """);
+    }
+
+    public void DisplayStorage<T>(Storage<T> storage) where T : class, ITraceable
+    {
+        Console.WriteLine(storage.ToString());
     }
 
     public string ReadCommand()

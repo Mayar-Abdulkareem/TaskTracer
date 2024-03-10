@@ -18,6 +18,18 @@ public class TraceableFactory
         SetPropertyValues(task, parameters);
         return task;
     }
+
+    public Project CreateProjectWithUpdate(Dictionary<string, string> parameters, Project project)
+    {
+        SetPropertyValues(project, parameters);
+        return project;
+    }
+    
+    public ToDoTask CreateTaskWithUpdate(Dictionary<string, string> parameters, ToDoTask task)
+    {
+        SetPropertyValues(task, parameters);
+        return task;
+    }
     
     private void SetPropertyValues<T>(T targetObject, Dictionary<string, string> parameters)
     {
