@@ -9,14 +9,15 @@ namespace TaskTracer.Application;
 public class Application
 {
     private readonly IDataStorageAccessor _dataStorageAccessor;
-    private StorageFactory storage;
+    private StorageRepository storage;
     private IUserInput _userInput;
+    private TraceableFactory factory = new TraceableFactory();
     
     public Application(IDataStorageAccessor dataStorageAccessor, IUserInput userInput)
     {
         _dataStorageAccessor = dataStorageAccessor;
         _userInput = userInput;
-        storage = new StorageFactory(_dataStorageAccessor);
+        storage = new StorageRepository(_dataStorageAccessor);
     }
 
     public void Run()
@@ -42,12 +43,12 @@ public class Application
                     _userInput.ShowMenu();
                     break;
                 case "add-project":
-                    var project = CreateProject(parameters);
+                    var project = factory.CreateProject(parameters);
                     storage.AddProject(project);
                     _userInput.ShowSuccessMessage($"Project with {project.ToString()} added successfully");
                     break;
                 case "add-task":
-                    var task = CreateTask(parameters);
+                    var task = factory.CreateTask(parameters);
                     storage.AddTask(task);
                     _userInput.ShowSuccessMessage($"Task with {task.ToString()} added successfully");
                     break;
@@ -55,81 +56,6 @@ public class Application
                     isValid = false;
                     break;
             }
-        }
-    }
-
-    Project CreateProject(Dictionary<string, string> parameters)
-    {
-        Project project = new Project();
-        SetPropertyValues(project, parameters);
-        storage.AddProject(project); 
-        return project;
-    }
-    
-    ToDoTask CreateTask(Dictionary<string, string> parameters)
-    {
-        ToDoTask task = new ToDoTask();
-        SetPropertyValues(task, parameters);
-        return task;
-    }
-    
-    private void SetPropertyValues<T>(T targetObject, Dictionary<string, string> parameters)
-    {
-        foreach (var param in parameters)
-        {
-            var propertyInfo = typeof(T).GetProperty(param.Key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-            if (propertyInfo != null)
-            {
-                try
-                {
-                    SetPropertyValue(targetObject, propertyInfo, param.Value);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error setting property {param.Key}: {ex.Message}");
-                }
-            }
-        }
-    }
-
-    private void SetPropertyValue<T>(T targetObject, PropertyInfo propertyInfo, string value)
-    {
-        if (propertyInfo.PropertyType == typeof(DateTime))
-        {
-            SetDateTimeProperty(targetObject, propertyInfo, value);
-        }
-        else if (propertyInfo.PropertyType.IsEnum)
-        {
-            SetEnumProperty(targetObject, propertyInfo, value);
-        }
-        else if (propertyInfo.PropertyType == typeof(string))
-        {
-            propertyInfo.SetValue(targetObject, value);
-        }
-    }
-
-    private void SetDateTimeProperty<T>(T targetObject, PropertyInfo propertyInfo, string value)
-    {
-        if (DateTime.TryParse(value, out DateTime dateTimeValue))
-        {
-            propertyInfo.SetValue(targetObject, dateTimeValue);
-        }
-        else
-        {
-            Console.WriteLine($"Invalid format for property {propertyInfo.Name}");
-        }
-    }
-
-    private void SetEnumProperty<T>(T targetObject, PropertyInfo propertyInfo, string value)
-    {
-        try
-        {
-            var enumValue = Enum.Parse(propertyInfo.PropertyType, value, ignoreCase: true);
-            propertyInfo.SetValue(targetObject, enumValue);
-        }
-        catch
-        {
-            Console.WriteLine($"Invalid enum value for property {propertyInfo.Name}");
         }
     }
 }

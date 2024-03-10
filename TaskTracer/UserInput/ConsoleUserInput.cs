@@ -13,6 +13,7 @@ public class ConsoleUserInput : IUserInput
             stop
             add-project Title=value, DueDate=value
             add-task Title=value, Description=value, StartDate=yyyy-mm-dd, EstimatedTime=value, DueDate=yyyy-mm-dd,Priority= <High, Medium or low>,Status=<Not Started, In Progress or Completed>
+            edit-project Title=value
             ******************************
             """);
     }

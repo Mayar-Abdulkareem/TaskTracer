@@ -3,12 +3,12 @@ using TaskTracer.Models;
 
 namespace TaskTracer.Storage;
 
-public class StorageFactory
+public class StorageRepository
 {
     private Storage<Project> projects;
     private Storage<ToDoTask> tasks;
     
-    public StorageFactory(IDataStorageAccessor dataStorageAccessor)
+    public StorageRepository(IDataStorageAccessor dataStorageAccessor)
     {
         projects = new Storage<Project>(dataStorageAccessor);
         tasks = new Storage<ToDoTask>(dataStorageAccessor);
