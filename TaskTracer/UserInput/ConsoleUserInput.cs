@@ -19,6 +19,8 @@ public class ConsoleUserInput : IUserInput
             display-tasks
             edit-project ID=value, parameter1=value, parameter2=value, ... etc
             edit-task ID=value, parameter1=value, parameter2=value, ... etc
+            delete-project ID=value
+            delete-task ID=value
             ******************************
             """);
     }

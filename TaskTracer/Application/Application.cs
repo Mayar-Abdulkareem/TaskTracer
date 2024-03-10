@@ -86,6 +86,30 @@ public class Application
                         _userInput.ShowError("ID not found");
                     }
                     break;
+                case "delete-project":
+                    string projectKey = parameters["ID".Trim().ToLower()];
+                    var success = storage.DeleteProject(projectKey);
+                    if (success)
+                    {
+                        _userInput.ShowSuccessMessage($"Project with ID {projectKey} deleted successfully");
+                    }
+                    else
+                    {
+                        _userInput.ShowError($"Project with ID {projectKey} wasn't found");
+                    }
+                    break;
+                case "delete-task":
+                    string taskKey = parameters["ID".Trim().ToLower()];
+                    var isFounded = storage.DeleteTask(taskKey);
+                    if (isFounded)
+                    {
+                        _userInput.ShowSuccessMessage($"Project with ID {taskKey} deleted successfully");
+                    }
+                    else
+                    {
+                        _userInput.ShowError($"Project with ID {taskKey} wasn't found");
+                    }
+                    break;
                 case "stop":
                     isValid = false;
                     break;

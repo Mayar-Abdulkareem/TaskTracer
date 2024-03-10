@@ -56,6 +56,16 @@ public class StorageRepository
     {
         tasks.Edit(key, task);
     }
+
+    public bool DeleteProject(string key)
+    {
+        return projects.Delete(key);
+    }
+
+    public bool DeleteTask(string key)
+    {
+        return tasks.Delete(key);
+    }
     
     public void DisplayProjects()
     {

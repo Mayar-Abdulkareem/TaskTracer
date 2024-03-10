@@ -31,6 +31,16 @@ public class Storage<T>(IDataStorageAccessor dataStorageAccessor) where T : clas
         return false;
     }
 
+    public bool Delete(string key)
+    {
+        if (storage.ContainsKey(key))
+        {
+            storage.Remove(key);
+            return true;
+        }
+        return false;
+    }
+
     public T? FindById(string id)
     {
         if (storage.ContainsKey(id))
