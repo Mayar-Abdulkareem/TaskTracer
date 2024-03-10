@@ -8,6 +8,7 @@ public class ConsoleUserInput : IUserInput
     {
         Console.WriteLine("""
             Task Tracer Commands:
+            ******************************
             show-menu
             stop
             add-project Title=value, DueDate=value
@@ -38,7 +39,7 @@ public class ConsoleUserInput : IUserInput
                     var keyValue = param.Split(new char[] { '=' }, 2);
                     if (keyValue.Length == 2)
                     {
-                        var key = keyValue[0].Trim();
+                        var key = keyValue[0].Trim().ToLower();
                         var value = keyValue[1].Trim();
                         parsedCommand.Parameters[key] = value; 
                     }
@@ -47,5 +48,15 @@ public class ConsoleUserInput : IUserInput
         }
 
         return parsedCommand;
+    }
+    
+    public void ShowSuccessMessage(string message)
+    {
+        Console.WriteLine(message);
+    }
+
+    public void ShowError(string message)
+    {
+        Console.WriteLine(message);
     }
 }

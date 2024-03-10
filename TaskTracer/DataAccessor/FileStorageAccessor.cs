@@ -4,9 +4,9 @@ using CsvHelper.Configuration;
 
 namespace TaskTracer.DataAccessor;
 
-public class FileStorageAccessor(string fileDirectoryPath) : IDataStorageAccessor
+public class FileStorageAccessor : IDataStorageAccessor
 {
-    private readonly string _fileDirectoryPath = fileDirectoryPath;
+    private readonly string _fileDirectoryPath = "/Users/ftsmobileteam/Desktop/Backend/RiderProject/TaskTracer/TaskTracer/Files";
 
     public Dictionary<string, T> LoadData<T>(FileType fileType)
     {

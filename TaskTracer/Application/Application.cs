@@ -1,6 +1,5 @@
 using System.Reflection;
 using TaskTracer.DataAccessor;
-using TaskTracer.Enums;
 using TaskTracer.Models;
 using TaskTracer.Storage;
 using TaskTracer.UserInput;
@@ -45,9 +44,12 @@ public class Application
                 case "add-project":
                     var project = CreateProject(parameters);
                     storage.AddProject(project);
-                    Console.WriteLine(storage.ToString());
+                    _userInput.ShowSuccessMessage($"Project with {project.ToString()} added successfully");
                     break;
                 case "add-task":
+                    var task = CreateTask(parameters);
+                    storage.AddTask(task);
+                    _userInput.ShowSuccessMessage($"Task with {task.ToString()} added successfully");
                     break;
                 case "stop":
                     isValid = false;
@@ -59,75 +61,75 @@ public class Application
     Project CreateProject(Dictionary<string, string> parameters)
     {
         Project project = new Project();
-        
+        SetPropertyValues(project, parameters);
+        storage.AddProject(project); 
+        return project;
+    }
+    
+    ToDoTask CreateTask(Dictionary<string, string> parameters)
+    {
+        ToDoTask task = new ToDoTask();
+        SetPropertyValues(task, parameters);
+        return task;
+    }
+    
+    private void SetPropertyValues<T>(T targetObject, Dictionary<string, string> parameters)
+    {
         foreach (var param in parameters)
         {
-            var propertyInfo = typeof(Project).GetProperty(param.Key);
+            var propertyInfo = typeof(T).GetProperty(param.Key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
             if (propertyInfo != null)
             {
-                if (propertyInfo.PropertyType == typeof(DateTime))
+                try
                 {
-                    if (DateTime.TryParse(param.Value, out DateTime dateTimeValue))
-                    {
-                        propertyInfo.SetValue(project, dateTimeValue);
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Invalid format for property {param.Key}");
-                    }
+                    SetPropertyValue(targetObject, propertyInfo, param.Value);
                 }
-                else if (propertyInfo.PropertyType == typeof(string))
+                catch (Exception ex)
                 {
-                    propertyInfo.SetValue(project, param.Value);
+                    Console.WriteLine($"Error setting property {param.Key}: {ex.Message}");
                 }
             }
         }
-
-        storage.AddProject(project); 
-
-        return project;
     }
-    //
-    // ToDoTask CreateTask(Dictionary<string, string> parameters)
-    // {
-    //     ToDoTask task = new ToDoTask();
-    //
-    //     foreach (var param in parameters)
-    //     {
-    //         var propertyInfo = typeof(ToDoTask).GetProperty(param.Key);
-    //         if (propertyInfo != null)
-    //         {
-    //             if (param.Key == "Status")
-    //             {
-    //                 switch (param.Value)
-    //                 {
-    //                     case MyTaskStatus.NotStarted:
-    //                         propertyInfo.SetValue(task, "NotStarted");
-    //                         break;
-    //                     case MyTaskStatus.InProgress:
-    //                         propertyInfo.SetValue(task, "InProgress");
-    //                         break;
-    //                     
-    //                 }
-    //             }
-    //             if (propertyInfo.PropertyType == typeof(DateTime))
-    //             {
-    //                 if (DateTime.TryParse(param.Value, out DateTime dateTimeValue))
-    //                 {
-    //                     propertyInfo.SetValue(task, dateTimeValue);
-    //                 }
-    //                 else
-    //                 {
-    //                     Console.WriteLine($"Invalid format for property {param.Key}");
-    //                 }
-    //             }
-    //             else if (propertyInfo.PropertyType == typeof(string))
-    //             {
-    //                 propertyInfo.SetValue(task, param.Value);
-    //             }
-    //         }
-    //     }
-    //
-    //     return task;
-    // }
+
+    private void SetPropertyValue<T>(T targetObject, PropertyInfo propertyInfo, string value)
+    {
+        if (propertyInfo.PropertyType == typeof(DateTime))
+        {
+            SetDateTimeProperty(targetObject, propertyInfo, value);
+        }
+        else if (propertyInfo.PropertyType.IsEnum)
+        {
+            SetEnumProperty(targetObject, propertyInfo, value);
+        }
+        else if (propertyInfo.PropertyType == typeof(string))
+        {
+            propertyInfo.SetValue(targetObject, value);
+        }
+    }
+
+    private void SetDateTimeProperty<T>(T targetObject, PropertyInfo propertyInfo, string value)
+    {
+        if (DateTime.TryParse(value, out DateTime dateTimeValue))
+        {
+            propertyInfo.SetValue(targetObject, dateTimeValue);
+        }
+        else
+        {
+            Console.WriteLine($"Invalid format for property {propertyInfo.Name}");
+        }
+    }
+
+    private void SetEnumProperty<T>(T targetObject, PropertyInfo propertyInfo, string value)
+    {
+        try
+        {
+            var enumValue = Enum.Parse(propertyInfo.PropertyType, value, ignoreCase: true);
+            propertyInfo.SetValue(targetObject, enumValue);
+        }
+        catch
+        {
+            Console.WriteLine($"Invalid enum value for property {propertyInfo.Name}");
+        }
+    }
 }

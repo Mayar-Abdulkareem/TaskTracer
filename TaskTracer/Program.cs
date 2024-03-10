@@ -3,5 +3,5 @@ using TaskTracer.Application;
 using TaskTracer.DataAccessor;
 using TaskTracer.UserInput;
 
-var app = new Application(new FileStorageAccessor("/Users/ftsmobileteam/Desktop/Backend/RiderProject/TaskTracer/TaskTracer/Files"), new ConsoleUserInput());
+var app = new Application(new FileStorageAccessor(), new ConsoleUserInput());
 app.Run();
