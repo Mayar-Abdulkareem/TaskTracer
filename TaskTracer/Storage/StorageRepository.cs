@@ -1,4 +1,5 @@
 using TaskTracer.DataAccessor;
+using TaskTracer.Enums;
 using TaskTracer.Models;
 using TaskTracer.UserInput;
 
@@ -75,5 +76,19 @@ public class StorageRepository
     public void DisplayTasks()
     {
         _userInput.DisplayStorage(tasks);
+    }
+    
+    public void ViewTasksDueOnDate(DateTime date)
+    {
+        var dueTasks = tasks.GetItems(
+            task => task.DueDate.Date == date.Date && task.Status != ToDoTaskStatus.Completed,
+            task => task.Priority
+        );
+
+        Console.WriteLine($"Tasks due on {date.ToShortDateString()}:");
+        foreach (var task in dueTasks)
+        {
+            Console.WriteLine(task.ToString()); 
+        }
     }
 }

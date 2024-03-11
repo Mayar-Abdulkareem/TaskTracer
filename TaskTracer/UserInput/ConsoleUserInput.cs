@@ -66,10 +66,12 @@ public class ConsoleUserInput : IUserInput
     public void ShowSuccessMessage(string message)
     {
         Console.WriteLine(message);
+        Console.WriteLine();
     }
 
     public void ShowError(string message)
     {
         Console.WriteLine(message);
+        Console.WriteLine();
     }
 }

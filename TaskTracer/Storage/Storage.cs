@@ -51,6 +51,21 @@ public class Storage<T>(IDataStorageAccessor dataStorageAccessor) where T : clas
         return null;
     }
     
+    public IEnumerable<T> GetItems(Func<T, bool> filter, Func<T, object> sorter = null)
+    {
+        var query = storage.Values.AsEnumerable();
+        if (filter != null)
+        {
+            query = query.Where(filter);
+        }
+        if (sorter != null)
+        {
+            query = query.OrderBy(sorter);
+        }
+
+        return query.ToList();
+    }
+    
     public override string ToString()
     {
         StringBuilder sb = new StringBuilder();
