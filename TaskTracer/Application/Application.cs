@@ -107,11 +107,12 @@ public class Application
             _userInput.ShowError("Invalid date format. Use 'today' or 'date=YYYY-MM-DD'.");
         }
     }
+    
     private void ShowMenu() => _userInput.ShowMenu();
 
     private void AddProject(Dictionary<string, string> parameters)
     {
-        var result = validator.Validate<Project>(parameters);
+        var result = validator.ValidateParameters<Project>(parameters);
         if (result.IsValid)
         {
             var project = factory.CreateProject(parameters);
@@ -122,14 +123,21 @@ public class Application
         {
             _userInput.ShowError(result.ToString());
         }
-        
     }
 
     private void AddTask(Dictionary<string, string> parameters)
     {
-        var task = factory.CreateTask(parameters);
-        storage.AddTask(task);
-        _userInput.ShowSuccessMessage($"Task '{task.Title}' added successfully.\n");
+        var result = validator.ValidateParameters<ToDoTask>(parameters);
+        if (result.IsValid)
+        {
+            var task = factory.CreateTask(parameters);
+            storage.AddTask(task);
+            _userInput.ShowSuccessMessage($"Task '{task.Title}' added successfully.\n");
+        }
+        else 
+        {
+            _userInput.ShowError(result.ToString());
+        }
     }
 
     private void DisplayProjects() => storage.DisplayProjects();
@@ -138,8 +146,10 @@ public class Application
 
     private void EditProject(Dictionary<string, string> parameters)
     {
-        if (parameters.TryGetValue("ID".Trim().ToLower(), out string id) && !string.IsNullOrWhiteSpace(id))
+        var result = validator.ValidateParameters<Project>(parameters, false, true);
+        if (result.IsValid)
         {
+            parameters.TryGetValue("id", out string id);
             var projectWithUpdate = storage.FindProjectById(id.Trim());
             if (projectWithUpdate != null)
             {
@@ -155,14 +165,16 @@ public class Application
         }
         else
         {
-            _userInput.ShowError("Project ID is required for editing.\n");
+            _userInput.ShowError(result.ToString());
         }
     }
 
     private void EditTask(Dictionary<string, string> parameters)
     {
-        if (parameters.TryGetValue("ID".Trim().ToLower(), out string id) && !string.IsNullOrWhiteSpace(id))
+        var result = validator.ValidateParameters<ToDoTask>(parameters, false, true);
+        if (result.IsValid)
         {
+            parameters.TryGetValue("id", out string id);
             var taskWithUpdate = storage.FindTaskById(id.Trim());
             if (taskWithUpdate != null)
             {
@@ -178,14 +190,16 @@ public class Application
         }
         else
         {
-            _userInput.ShowError("Task ID is required for editing.\n");
+            _userInput.ShowError(result.ToString());
         }
     }
 
     private void DeleteProject(Dictionary<string, string> parameters)
     {
-        if (parameters.TryGetValue("ID".Trim().ToLower(), out string id) && !string.IsNullOrWhiteSpace(id))
+        var result = validator.ValidateParameters<Project>(parameters, false, true);
+        if (result.IsValid)
         {
+            parameters.TryGetValue("id", out string id);
             var success = storage.DeleteProject(id.Trim());
             if (success)
             {
@@ -198,14 +212,16 @@ public class Application
         }
         else
         {
-            _userInput.ShowError("Project ID is required for deletion.\n");
+            _userInput.ShowError(result.ToString());
         }
     }
 
     private void DeleteTask(Dictionary<string, string> parameters)
     {
-        if (parameters.TryGetValue("ID".Trim().ToLower(), out string id) && !string.IsNullOrWhiteSpace(id))
+        var result = validator.ValidateParameters<ToDoTask>(parameters, false, true);
+        if (result.IsValid)
         {
+            parameters.TryGetValue("id", out string id);
             var success = storage.DeleteTask(id.Trim());
             if (success)
             {
@@ -218,7 +234,7 @@ public class Application
         }
         else
         {
-            _userInput.ShowError("Task ID is required for deletion.\n");
+            _userInput.ShowError(result.ToString());
         }
     }
 }

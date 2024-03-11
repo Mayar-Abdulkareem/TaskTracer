@@ -1,11 +1,11 @@
 using System.Reflection;
-using TaskTracer.Models;
+using TaskTracer.Storage;
 
 namespace TaskTracer.Validation;
 
 public class Validator 
 {
-    public ValidationResult Validate<T>(Dictionary<string, string> parameters)
+    public ValidationResult ValidateParameters<T>(Dictionary<string, string> parameters, bool containsAllProperty = true, bool validateId = false)
     {
         ValidationResult result = new ValidationResult();
 
@@ -15,9 +15,10 @@ public class Validator
         foreach (var property in properties)
         {
             var name = property.Name.ToLower();
+            
             if (!parametersLowerCase.ContainsKey(name))
             {
-                if (!name.Equals("id"))
+                if ((validateId && name.Equals("id")) || (!name.Equals("id") && containsAllProperty))
                 {
                     result.AddError($"Missing {property.Name} property.");
                 }
