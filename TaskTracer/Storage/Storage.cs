@@ -66,6 +66,11 @@ public class Storage<T>(IDataStorageAccessor dataStorageAccessor) where T : clas
         return query.ToList();
     }
     
+    public IEnumerable<T> GetOverdueTasks(Func<T, bool> isOverdueFunc)
+    {
+        return storage.Values.Where(isOverdueFunc);
+    }
+    
     public override string ToString()
     {
         StringBuilder sb = new StringBuilder();

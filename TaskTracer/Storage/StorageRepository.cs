@@ -85,10 +85,21 @@ public class StorageRepository
             task => task.Priority
         );
 
-        Console.WriteLine($"Tasks due on {date.ToShortDateString()}:");
+        _userInput.ShowSuccessMessage($"Tasks due on {date.ToShortDateString()}:");
         foreach (var task in dueTasks)
         {
-            Console.WriteLine(task.ToString()); 
+            _userInput.ShowSuccessMessage(task.ToString()); 
+        }
+    }
+    
+    public void DisplayOverdueTasks()
+    {
+        var overdueTasks = tasks.GetOverdueTasks(task => 
+            task.DueDate < DateTime.Today && task.Status != ToDoTaskStatus.Completed);
+
+        foreach (var task in overdueTasks)
+        {
+            _userInput.ShowSuccessMessage(task.ToString()); 
         }
     }
 }

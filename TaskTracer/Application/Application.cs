@@ -71,6 +71,9 @@ public class Application
                 case "view-tasks":
                     ViewTasksByDate(parameters);
                     break;
+                case "view-overdue-tasks":
+                    ViewOverdueTasks();
+                    break;
                 case "stop":
                     isValid = false;
                     break;
@@ -86,6 +89,8 @@ public class Application
         DateTime now = DateTime.Now;
         storage.ViewTasksDueOnDate(now);
     }
+
+    private void ViewOverdueTasks() => storage.DisplayOverdueTasks();
     
     private void ViewTasksByDate(Dictionary<string, string> parameters)
     {
