@@ -1,6 +1,6 @@
 namespace TaskTracer.Models;
 
-public class Project : ITraceable
+public class Project 
 {
     public string ID { get; set; }
     public string Title { get; set; }

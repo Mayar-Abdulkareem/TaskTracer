@@ -1,6 +1,8 @@
 using TaskTracer.DataAccessor;
+using TaskTracer.Models;
 using TaskTracer.Storage;
 using TaskTracer.UserInput;
+using TaskTracer.Validation;
 
 namespace TaskTracer.Application;
 
@@ -10,13 +12,14 @@ public class Application
     private readonly StorageRepository storage;
     private readonly IUserInput _userInput;
     private readonly TraceableFactory factory;
-
+    private readonly Validator validator;
     public Application(IDataStorageAccessor dataStorageAccessor, IUserInput userInput)
     {
         _dataStorageAccessor = dataStorageAccessor;
         _userInput = userInput;
         factory = new TraceableFactory();
         storage = new StorageRepository(_dataStorageAccessor, _userInput);
+        validator = new Validator();
     }
 
     public void Run()
@@ -78,7 +81,7 @@ public class Application
                     isValid = false;
                     break;
                 default:
-                    _userInput.ShowError("Unknown command.");
+                    _userInput.ShowError("Unknown command.\n");
                     break;
             }
         }
@@ -108,16 +111,25 @@ public class Application
 
     private void AddProject(Dictionary<string, string> parameters)
     {
-        var project = factory.CreateProject(parameters);
-        storage.AddProject(project);
-        _userInput.ShowSuccessMessage($"Project '{project.Title}' added successfully.");
+        var result = validator.Validate<Project>(parameters);
+        if (result.IsValid)
+        {
+            var project = factory.CreateProject(parameters);
+            storage.AddProject(project);
+            _userInput.ShowSuccessMessage($"Project '{project.Title}' added successfully.\n");
+        }
+        else 
+        {
+            _userInput.ShowError(result.ToString());
+        }
+        
     }
 
     private void AddTask(Dictionary<string, string> parameters)
     {
         var task = factory.CreateTask(parameters);
         storage.AddTask(task);
-        _userInput.ShowSuccessMessage($"Task '{task.Title}' added successfully.");
+        _userInput.ShowSuccessMessage($"Task '{task.Title}' added successfully.\n");
     }
 
     private void DisplayProjects() => storage.DisplayProjects();
@@ -134,16 +146,16 @@ public class Application
                 parameters.Remove("ID");
                 var projectAfterUpdate = factory.CreateProjectWithUpdate(parameters, projectWithUpdate);
                 storage.EditProject(id, projectAfterUpdate);
-                _userInput.ShowSuccessMessage($"Project with ID {id} updated successfully.");
+                _userInput.ShowSuccessMessage($"Project with ID {id} updated successfully.\n");
             }
             else
             {
-                _userInput.ShowError("Project ID not found.");
+                _userInput.ShowError("Project ID not found.\n");
             }
         }
         else
         {
-            _userInput.ShowError("Project ID is required for editing.");
+            _userInput.ShowError("Project ID is required for editing.\n");
         }
     }
 
@@ -157,16 +169,16 @@ public class Application
                 parameters.Remove("ID");
                 var updatedTask = factory.CreateTaskWithUpdate(parameters, taskWithUpdate);
                 storage.EditTask(id, updatedTask);
-                _userInput.ShowSuccessMessage($"Task with ID {id} updated successfully.");
+                _userInput.ShowSuccessMessage($"Task with ID {id} updated successfully.\n");
             }
             else
             {
-                _userInput.ShowError("Task ID not found.");
+                _userInput.ShowError("Task ID not found.\n");
             }
         }
         else
         {
-            _userInput.ShowError("Task ID is required for editing.");
+            _userInput.ShowError("Task ID is required for editing.\n");
         }
     }
 
@@ -177,16 +189,16 @@ public class Application
             var success = storage.DeleteProject(id.Trim());
             if (success)
             {
-                _userInput.ShowSuccessMessage($"Project with ID {id} deleted successfully.");
+                _userInput.ShowSuccessMessage($"Project with ID {id} deleted successfully.\n");
             }
             else
             {
-                _userInput.ShowError($"Project with ID {id} wasn't found.");
+                _userInput.ShowError($"Project with ID {id} wasn't found.\n");
             }
         }
         else
         {
-            _userInput.ShowError("Project ID is required for deletion.");
+            _userInput.ShowError("Project ID is required for deletion.\n");
         }
     }
 
@@ -197,16 +209,16 @@ public class Application
             var success = storage.DeleteTask(id.Trim());
             if (success)
             {
-                _userInput.ShowSuccessMessage($"Task with ID {id} deleted successfully.");
+                _userInput.ShowSuccessMessage($"Task with ID {id} deleted successfully.\n");
             }
             else
             {
-                _userInput.ShowError($"Task with ID {id} wasn't found.");
+                _userInput.ShowError($"Task with ID {id} wasn't found.\n");
             }
         }
         else
         {
-            _userInput.ShowError("Task ID is required for deletion.");
+            _userInput.ShowError("Task ID is required for deletion.\n");
         }
     }
 }

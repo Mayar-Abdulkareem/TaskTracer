@@ -2,7 +2,7 @@ using TaskTracer.Enums;
 
 namespace TaskTracer.Models;
 
-public class ToDoTask : ITraceable
+public class ToDoTask 
 {
     public string ID { get; set; }
     public string Title { get; set; }

@@ -1,30 +1,29 @@
 using System.Text;
 using TaskTracer.DataAccessor;
-using TaskTracer.Models;
 
 namespace TaskTracer.Storage;
 
-public class Storage<T>(IDataStorageAccessor dataStorageAccessor) where T : class, ITraceable
+public class Storage<T>(IDataStorageAccessor dataStorageAccessor) where T : class
 {
-    public Dictionary<string, T> storage = new Dictionary<string, T>();
+    private Dictionary<string, T> _storage = new Dictionary<string, T>();
 
     private IDataStorageAccessor _dataStorageAccessor = dataStorageAccessor;
 
     public void Load(FileType fileType)
     {
-        storage = _dataStorageAccessor.LoadData<T>(fileType);
+        _storage = _dataStorageAccessor.LoadData<T>(fileType);
     }
 
     public void Add(string key, T item)
     {
-        storage.Add(key, item);
+        _storage.Add(key, item);
     }
 
     public bool Edit(string key, T item)
     {
-        if (storage.ContainsKey(key))
+        if (_storage.ContainsKey(key))
         {
-            storage[key] = item;
+            _storage[key] = item;
             return true;
         }
 
@@ -33,9 +32,9 @@ public class Storage<T>(IDataStorageAccessor dataStorageAccessor) where T : clas
 
     public bool Delete(string key)
     {
-        if (storage.ContainsKey(key))
+        if (_storage.ContainsKey(key))
         {
-            storage.Remove(key);
+            _storage.Remove(key);
             return true;
         }
         return false;
@@ -43,9 +42,9 @@ public class Storage<T>(IDataStorageAccessor dataStorageAccessor) where T : clas
 
     public T? FindById(string id)
     {
-        if (storage.ContainsKey(id))
+        if (_storage.ContainsKey(id))
         {
-            return storage[id];
+            return _storage[id];
         }
 
         return null;
@@ -53,7 +52,7 @@ public class Storage<T>(IDataStorageAccessor dataStorageAccessor) where T : clas
     
     public IEnumerable<T> GetItems(Func<T, bool> filter, Func<T, object> sorter = null)
     {
-        var query = storage.Values.AsEnumerable();
+        var query = _storage.Values.AsEnumerable();
         if (filter != null)
         {
             query = query.Where(filter);
@@ -68,14 +67,14 @@ public class Storage<T>(IDataStorageAccessor dataStorageAccessor) where T : clas
     
     public IEnumerable<T> GetOverdueTasks(Func<T, bool> isOverdueFunc)
     {
-        return storage.Values.Where(isOverdueFunc);
+        return _storage.Values.Where(isOverdueFunc);
     }
     
     public override string ToString()
     {
         StringBuilder sb = new StringBuilder();
         sb.AppendLine("Storage Contents:");
-        foreach (var item in storage)
+        foreach (var item in _storage)
         {
             sb.AppendLine($"({item.Key}, {item.Value})");
         }

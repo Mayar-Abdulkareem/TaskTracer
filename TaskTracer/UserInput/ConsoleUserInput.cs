@@ -27,7 +27,7 @@ public class ConsoleUserInput : IUserInput
             """);
     }
 
-    public void DisplayStorage<T>(Storage<T> storage) where T : class, ITraceable
+    public void DisplayStorage<T>(Storage<T> storage) where T : class
     {
         Console.WriteLine(storage.ToString());
     }
@@ -68,12 +68,10 @@ public class ConsoleUserInput : IUserInput
     public void ShowSuccessMessage(string message)
     {
         Console.WriteLine(message);
-        Console.WriteLine();
     }
 
     public void ShowError(string message)
     {
         Console.WriteLine(message);
-        Console.WriteLine();
     }
 }
