@@ -26,8 +26,8 @@ public class StorageRepository
     public bool Load()
     {
         return 
-            projects.Load("/Users/ftsmobileteam/Desktop/Backend/RiderProject/TaskTracer/TaskTracer/Files/Projects.csv")
-            && tasks.Load("/Users/ftsmobileteam/Desktop/Backend/RiderProject/TaskTracer/TaskTracer/Files/ToDoTasks.csv");
+            projects.Load("Files/Projects.csv")
+            && tasks.Load("Files/ToDoTasks.csv");
     }
 
     public void ImportTasks(string filePath)

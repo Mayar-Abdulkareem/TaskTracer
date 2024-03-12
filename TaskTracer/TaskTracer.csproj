@@ -22,6 +22,12 @@
 
     <ItemGroup>
       <None Remove="IValidator\**" />
+      <None Update="Files\Projects.csv">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Files\ToDoTasks.csv">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>
