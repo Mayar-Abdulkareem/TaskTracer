@@ -2,6 +2,7 @@ using TaskTracer.DataAccessor;
 using TaskTracer.Enums;
 using TaskTracer.Models;
 using TaskTracer.UserInput;
+using TaskTracer.Validation;
 
 namespace TaskTracer.Storage;
 
@@ -10,18 +11,42 @@ public class StorageRepository
     private Storage<Project> projects;
     private Storage<ToDoTask> tasks;
     private IUserInput _userInput;
+    private IDataStorageAccessor _dataStorageAccessor;
+    private IValidator _validator;
     
-    public StorageRepository(IDataStorageAccessor dataStorageAccessor, IUserInput userInput)
+    public StorageRepository(IDataStorageAccessor dataStorageAccessor, IUserInput userInput, IValidator validator)
     {
-        projects = new Storage<Project>(dataStorageAccessor);
-        tasks = new Storage<ToDoTask>(dataStorageAccessor);
+        projects = new Storage<Project>(dataStorageAccessor, userInput);
+        tasks = new Storage<ToDoTask>(dataStorageAccessor, userInput);
         _userInput = userInput;
+        _dataStorageAccessor = dataStorageAccessor;
+        _validator = validator;
     }
     
-    public void Load()
+    public bool Load()
     {
-        projects.Load(FileType.Projects);
-        tasks.Load(FileType.ToDoTasks);
+        return 
+            projects.Load("/Users/ftsmobileteam/Desktop/Backend/RiderProject/TaskTracer/TaskTracer/Files/Projects.csv")
+            && tasks.Load("/Users/ftsmobileteam/Desktop/Backend/RiderProject/TaskTracer/TaskTracer/Files/ToDoTasks.csv");
+    }
+
+    public void ImportTasks(string filePath)
+    {
+        var importedTasks = new Storage<ToDoTask>(_dataStorageAccessor, _userInput);
+        if (importedTasks.Load(filePath))
+        {
+            var result = _validator.ValidateTasks(projects, importedTasks, tasks);
+            if (result.IsValid)
+            {
+                importedTasks.Save(FileType.ToDoTasks, true);
+                tasks.AppendStorage(importedTasks);
+                _userInput.ShowSuccessMessage("File imported successfully.\n");
+            }
+            else
+            {
+                _userInput.ShowError(result.ToString());
+            }
+        }
     }
 
     public void AddProject(Project project)
@@ -101,5 +126,17 @@ public class StorageRepository
         {
             _userInput.ShowSuccessMessage(task.ToString()); 
         }
+    }
+
+    public void SaveProjects()
+    {
+        projects.Save(FileType.Projects);
+        _userInput.ShowSuccessMessage("Projects saved successfully.\n");
+    }
+    
+    public void SaveTasks()
+    {
+        tasks.Save(FileType.ToDoTasks);
+        _userInput.ShowSuccessMessage("Tasks saved successfully.\n");
     }
 }

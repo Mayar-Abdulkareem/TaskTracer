@@ -12,21 +12,23 @@ public class Application
     private readonly StorageRepository storage;
     private readonly IUserInput _userInput;
     private readonly TraceableFactory factory;
-    private readonly Validator validator;
-    public Application(IDataStorageAccessor dataStorageAccessor, IUserInput userInput)
+    private readonly IValidator _validator;
+    public Application(IDataStorageAccessor dataStorageAccessor, IUserInput userInput, IValidator validator)
     {
         _dataStorageAccessor = dataStorageAccessor;
         _userInput = userInput;
+        _validator = validator;
         factory = new TraceableFactory();
-        storage = new StorageRepository(_dataStorageAccessor, _userInput);
-        validator = new Validator();
+        storage = new StorageRepository(_dataStorageAccessor, _userInput, validator);
     }
 
     public void Run()
     {
-        storage.Load();
-        _userInput.ShowMenu();
-        RunCommand();
+        if (storage.Load())
+        {
+            _userInput.ShowMenu();
+            RunCommand();
+        }
     }
 
     private void RunCommand()
@@ -77,6 +79,15 @@ public class Application
                 case "view-overdue-tasks":
                     ViewOverdueTasks();
                     break;
+                case "import-tasks":
+                    ImportTasks(parameters);
+                    break;
+                case "save-projects":
+                    SaveProjects();
+                    break;
+                case "save-tasks":
+                    SaveTasks();
+                    break;
                 case "stop":
                     isValid = false;
                     break;
@@ -87,6 +98,25 @@ public class Application
         }
     }
 
+    private void SaveProjects() => storage.SaveProjects();
+
+    private void SaveTasks() => storage.SaveTasks();
+
+    private void ImportTasks(Dictionary<string, string> parameters)
+    {
+        var parametersLowerCase = parameters.ToDictionary(k => k.Key.ToLower(), v => v.Value);
+        var result = _validator.ValidatePathParameter(parametersLowerCase);
+        parameters.TryGetValue("path", out string path);
+        if (result.IsValid)
+        {
+            storage.ImportTasks(path);
+        }
+        else
+        {
+            _userInput.ShowError(result.ToString());
+        }
+    }
+    
     private void ViewTodayTasks()
     {
         DateTime now = DateTime.Now;
@@ -112,7 +142,7 @@ public class Application
 
     private void AddProject(Dictionary<string, string> parameters)
     {
-        var result = validator.ValidateParameters<Project>(parameters);
+        var result = _validator.ValidateParameters<Project>(parameters);
         if (result.IsValid)
         {
             var project = factory.CreateProject(parameters);
@@ -127,7 +157,7 @@ public class Application
 
     private void AddTask(Dictionary<string, string> parameters)
     {
-        var result = validator.ValidateParameters<ToDoTask>(parameters);
+        var result = _validator.ValidateParameters<ToDoTask>(parameters);
         if (result.IsValid)
         {
             var task = factory.CreateTask(parameters);
@@ -146,7 +176,7 @@ public class Application
 
     private void EditProject(Dictionary<string, string> parameters)
     {
-        var result = validator.ValidateParameters<Project>(parameters, false, true);
+        var result = _validator.ValidateParameters<Project>(parameters, false, true);
         if (result.IsValid)
         {
             parameters.TryGetValue("id", out string id);
@@ -171,7 +201,7 @@ public class Application
 
     private void EditTask(Dictionary<string, string> parameters)
     {
-        var result = validator.ValidateParameters<ToDoTask>(parameters, false, true);
+        var result = _validator.ValidateParameters<ToDoTask>(parameters, false, true);
         if (result.IsValid)
         {
             parameters.TryGetValue("id", out string id);
@@ -196,7 +226,7 @@ public class Application
 
     private void DeleteProject(Dictionary<string, string> parameters)
     {
-        var result = validator.ValidateParameters<Project>(parameters, false, true);
+        var result = _validator.ValidateParameters<Project>(parameters, false, true);
         if (result.IsValid)
         {
             parameters.TryGetValue("id", out string id);
@@ -218,7 +248,7 @@ public class Application
 
     private void DeleteTask(Dictionary<string, string> parameters)
     {
-        var result = validator.ValidateParameters<ToDoTask>(parameters, false, true);
+        var result = _validator.ValidateParameters<ToDoTask>(parameters, false, true);
         if (result.IsValid)
         {
             parameters.TryGetValue("id", out string id);

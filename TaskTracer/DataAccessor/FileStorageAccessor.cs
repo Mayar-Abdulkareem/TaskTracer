@@ -8,9 +8,9 @@ public class FileStorageAccessor : IDataStorageAccessor
 {
     private readonly string _fileDirectoryPath = "/Users/ftsmobileteam/Desktop/Backend/RiderProject/TaskTracer/TaskTracer/Files";
 
-    public Dictionary<string, T> LoadData<T>(FileType fileType)
+    public Dictionary<string, T> LoadData<T>(string filePath)
     {
-        var filePath = Path.Combine(_fileDirectoryPath, fileType.ToString() + ".csv");
+        //var filePath = Path.Combine(_fileDirectoryPath, fileType.ToString() + ".csv");
 
         var config = new CsvConfiguration(CultureInfo.InvariantCulture);
         Dictionary<string, T> dictionary;
@@ -38,5 +38,30 @@ public class FileStorageAccessor : IDataStorageAccessor
             return idValue;
         });
         return dictionary;
+    }
+
+    public void WriteData<T>(FileType fileType, Dictionary<string, T> data, bool append = false)
+    {
+        var filePath = Path.Combine(_fileDirectoryPath, fileType.ToString() + ".csv");
+    
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            HasHeaderRecord = false,
+        };
+
+        using var writer = new StreamWriter(filePath, append: append);
+        using var csv = new CsvWriter(writer, config);
+        
+        if (!append || new FileInfo(filePath).Length == 0)
+        {
+            csv.WriteHeader<T>();
+            csv.NextRecord();
+        }
+    
+        foreach (var item in data.Values)
+        {
+            csv.WriteRecord(item);
+            csv.NextRecord();
+        }
     }
 }

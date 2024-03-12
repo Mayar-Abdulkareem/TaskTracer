@@ -12,7 +12,6 @@ public class ConsoleUserInput : IUserInput
             Task Tracer Commands:
             ******************************
             show-menu
-            stop
             add-project Title=value, DueDate=value
             add-task Title=value, Description=value, StartDate=yyyy-mm-dd, EstimatedTime=value, DueDate=yyyy-mm-dd,Priority= <High, Medium or low>,Status=<Not Started, In Progress or Completed>
             display-projects
@@ -23,6 +22,10 @@ public class ConsoleUserInput : IUserInput
             delete-task ID=value
             view-today-tasks
             view-tasks date=value
+            save-projects
+            save-tasks
+            import-tasks path=value
+            stop
             ******************************
             """);
     }
