@@ -26,26 +26,25 @@ public class StorageRepository
     public bool Load()
     {
         return 
-            projects.Load("Files/Projects.csv")
-            && tasks.Load("Files/ToDoTasks.csv");
+            projects.Load("../../../Files/Projects.csv")
+            && tasks.Load("../../../Files/ToDoTasks.csv");
     }
 
     public void ImportTasks(string filePath)
     {
         var importedTasks = new Storage<ToDoTask>(_dataStorageAccessor, _userInput);
-        if (importedTasks.Load(filePath))
+        if (!importedTasks.Load(filePath)) return;
+        
+        var result = _validator.ValidateTasks(projects, importedTasks, tasks);
+        if (result.IsValid)
         {
-            var result = _validator.ValidateTasks(projects, importedTasks, tasks);
-            if (result.IsValid)
-            {
-                importedTasks.Save(FileType.ToDoTasks, true);
-                tasks.AppendStorage(importedTasks);
-                _userInput.ShowSuccessMessage("File imported successfully.\n");
-            }
-            else
-            {
-                _userInput.ShowError(result.ToString());
-            }
+            importedTasks.Save(FileType.ToDoTasks, true);
+            tasks.AppendStorage(importedTasks);
+            _userInput.ShowSuccessMessage("File imported successfully.\n");
+        }
+        else
+        {
+            _userInput.ShowError(result.ToString());
         }
     }
 
@@ -110,16 +109,23 @@ public class StorageRepository
             task => task.Priority
         );
 
+        if (dueTasks.Count() == 0)
+        {
+            _userInput.ShowSuccessMessage("No tasks to show.\n");
+            return;
+        }
+        
         _userInput.ShowSuccessMessage($"Tasks due on {date.ToShortDateString()}:");
         foreach (var task in dueTasks)
         {
             _userInput.ShowSuccessMessage(task.ToString()); 
         }
+        _userInput.ShowSuccessMessage("");
     }
     
     public void DisplayOverdueTasks()
     {
-        var overdueTasks = tasks.GetOverdueTasks(task => 
+        var overdueTasks = tasks.GetItems(task => 
             task.DueDate < DateTime.Today && task.Status != ToDoTaskStatus.Completed);
 
         foreach (var task in overdueTasks)

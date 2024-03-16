@@ -6,12 +6,10 @@ namespace TaskTracer.DataAccessor;
 
 public class FileStorageAccessor : IDataStorageAccessor
 {
-    private readonly string _fileDirectoryPath = "/Users/ftsmobileteam/Desktop/Backend/RiderProject/TaskTracer/TaskTracer/Files";
+    private readonly string _fileDirectoryPath = "../../../Files";
 
     public Dictionary<string, T> LoadData<T>(string filePath)
     {
-        //var filePath = Path.Combine(_fileDirectoryPath, fileType.ToString() + ".csv");
-
         var config = new CsvConfiguration(CultureInfo.InvariantCulture);
         Dictionary<string, T> dictionary;
         
@@ -19,8 +17,7 @@ public class FileStorageAccessor : IDataStorageAccessor
         using var csv = new CsvReader(reader, config);
         csv.Context.RegisterClassMap<ToDoTaskMap>();
         var records = csv.GetRecords<T>().ToList();
-
-
+        
         dictionary = records.ToDictionary(record =>
         {
             var idProperty = typeof(T).GetProperty("ID");

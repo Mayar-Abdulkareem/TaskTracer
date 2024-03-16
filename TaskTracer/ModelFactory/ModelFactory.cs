@@ -1,9 +1,10 @@
 using System.Reflection;
 using TaskTracer.Models;
+using TaskTracer.UserInput;
 
 namespace TaskTracer.Application;
 
-public class TraceableFactory
+public class ModelFactory(IUserInput userInput)
 {
     public Project CreateProject(Dictionary<string, string> parameters)
     {
@@ -36,16 +37,14 @@ public class TraceableFactory
         foreach (var param in parameters)
         {
             var propertyInfo = typeof(T).GetProperty(param.Key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-            if (propertyInfo != null)
+            if (propertyInfo == null) continue;
+            try
             {
-                try
-                {
-                    SetPropertyValue(targetObject, propertyInfo, param.Value);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error setting property {param.Key}: {ex.Message}");
-                }
+                SetPropertyValue(targetObject, propertyInfo, param.Value);
+            }
+            catch (Exception ex)
+            {
+                userInput.ShowError($"Error setting property {param.Key}: {ex.Message}");
             }
         }
     }
@@ -68,7 +67,10 @@ public class TraceableFactory
 
     private void SetDateTimeProperty<T>(T targetObject, PropertyInfo propertyInfo, string value)
     {
-        if (DateTime.TryParse(value, out DateTime dateTimeValue))
+        var format = "MM-dd-yyyy"; 
+        var culture = System.Globalization.CultureInfo.InvariantCulture;
+
+        if (DateTime.TryParseExact(value, format, culture, System.Globalization.DateTimeStyles.None, out DateTime dateTimeValue))
         {
             propertyInfo.SetValue(targetObject, dateTimeValue);
         }

@@ -5,7 +5,7 @@ namespace TaskTracer.Validation;
 public class ValidationResult
 {
     public bool IsValid { get; set; } = true;
-    public List<string> Errors = new List<string>();
+    private List<string> Errors = new List<string>();
     
     public void AddError(string error)
     {

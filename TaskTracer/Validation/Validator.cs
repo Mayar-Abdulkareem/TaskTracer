@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Reflection;
 using TaskTracer.Models;
 using TaskTracer.Storage;
@@ -6,7 +7,15 @@ namespace TaskTracer.Validation;
 
 public class Validator : IValidator
 {
-    public ValidationResult ValidateParameters<T>(Dictionary<string, string> parameters, bool containsAllProperty = true, bool validateId = false)
+    /// <summary>
+    /// Validates user-provided parameters. Not null, valid date format, and valid enum type.
+    /// </summary>
+    /// <typeparam name="T">The type of the model that parameters are validated against.</typeparam>
+    /// <param name="parameters">A dictionary containing the parameters to validate, where the key is the parameter name and the value is the parameter's value.</param>
+    /// <param name="requiresAllProperties">Indicates whether all properties of the model <typeparamref name="T"/> need to be present in the parameters for the validation to pass. Useful for operations like adding a new record, where completeness is necessary.</param>
+    /// <param name="requiresId">Indicates whether the validation process should verify the presence of an 'ID' parameter. This is typically used for operations like editing or deleting, where identifying the target record is essential.</param>
+    /// <returns>A <see cref="ValidationResult"/> object that contains the outcome of the validation process, including whether the validation succeeded and any messages related to validation failures.</returns>
+    public ValidationResult ValidateParameters<T>(Dictionary<string, string> parameters, bool requiresAllProperties = true, bool requiresId = false)
     {
         ValidationResult result = new ValidationResult();
 
@@ -19,7 +28,7 @@ public class Validator : IValidator
             
             if (!parametersLowerCase.ContainsKey(name))
             {
-                if ((validateId && name.Equals("id")) || (!name.Equals("id") && containsAllProperty))
+                if ((requiresId && name.Equals("id")) || (!name.Equals("id") && requiresAllProperties))
                 {
                     result.AddError($"Missing {property.Name} property.");
                 }
@@ -50,16 +59,21 @@ public class Validator : IValidator
 
     private bool ValidateEnum(Type enumType, string value)
     {
-        object enumValue;
-        return Enum.TryParse(enumType, value, ignoreCase: true, out enumValue);
+        return Enum.TryParse(enumType, value, ignoreCase: true, out var enumValue);
     }
 
     private bool ValidateDateTime(string value)
     {
-        DateTime dateTimeValue;
-        return DateTime.TryParse(value, out dateTimeValue);
+        var format = "MM-dd-yyyy"; 
+        var culture = System.Globalization.CultureInfo.InvariantCulture;
+        return DateTime.TryParseExact(value, format, culture, DateTimeStyles.None, out var dateTimeValue);
     }
 
+    // Unique ID for the task
+    // Task start date before the task due date
+    // The project for that task exist
+    // Task start date before 
+    // Task due date before project due date 
     public ValidationResult ValidateTasks(Storage<Project> projectsStorage, Storage<ToDoTask> tasksStorage, Storage<ToDoTask> previousTasks)
     {
         ValidationResult result = new ValidationResult();
@@ -83,20 +97,21 @@ public class Validator : IValidator
             if (projects.Count() == 0)
             {
                 result.AddError($"Project {task.PID} doesn't exist.");
+                continue;
             }
-            else
-            {
-                var project = projects.First();
+            
+            var project = projects.First();
 
-                if (project.DueDate > task.StartDate)
-                {
-                    result.AddError($"Task {task.ID} in Project {project.ID} has a start date after the project's due date.");
-                } 
-            }
+            if (project.DueDate > task.DueDate)
+            {
+                result.AddError($"Task {task.ID} in Project {project.ID} has a due date after the project's due date.");
+            } 
         }
         return result;
     }
 
+    // Make sure there is a path parameter passed
+    // Validate the ability te read from that path 
     public ValidationResult ValidatePathParameter(Dictionary<string, string> parameters)
     {
         ValidationResult result = new ValidationResult();
@@ -115,7 +130,7 @@ public class Validator : IValidator
         }
         catch (Exception ex)
         {
-            result.AddError(ex.Message);
+            result.AddError("Error importing the file");
         }
 
         return result;

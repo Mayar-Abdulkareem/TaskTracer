@@ -6,27 +6,24 @@ namespace TaskTracer.Storage;
 
 public class Storage<T>(IDataStorageAccessor dataStorageAccessor, IUserInput userInput) where T : class
 {
-    public Dictionary<string, T> _storage = new Dictionary<string, T>();
-
-    private IDataStorageAccessor _dataStorageAccessor = dataStorageAccessor;
-    private IUserInput _userInput = userInput;
-
+    private Dictionary<string, T> _storage = new Dictionary<string, T>();
+    
     public bool Load(string filePath)
     {
         var success = true;
         try
         {
-            _storage = _dataStorageAccessor.LoadData<T>(filePath);
+            _storage = dataStorageAccessor.LoadData<T>(filePath);
         }
         catch (ArgumentException ex)
         {
             success = false;
-            _userInput.ShowError($"Error loading data: {ex.Message}");
+            userInput.ShowError($"Error loading data: {ex.Message}");
         }
         catch (Exception ex)
         {
             success = false;
-            _userInput.ShowError($"An unexpected error occurred: {ex.Message}");
+            userInput.ShowError($"An unexpected error occurred: {ex.Message}");
         }
 
         return success;
@@ -67,13 +64,13 @@ public class Storage<T>(IDataStorageAccessor dataStorageAccessor, IUserInput use
 
         return null;
     }
-    
-    public IEnumerable<KeyValuePair<string, T>> GetStorage()
+
+    private IEnumerable<KeyValuePair<string, T>> GetStorage()
     {
         return _storage.AsEnumerable();
     }
     
-    public IEnumerable<T> GetItems(Func<T, bool> filter = null, Func<T, object> sorter = null)
+    public IEnumerable<T> GetItems(Func<T, bool>? filter = null, Func<T, object>? sorter = null)
     {
         var query = _storage.Values.AsEnumerable();
         if (filter != null)
@@ -87,15 +84,10 @@ public class Storage<T>(IDataStorageAccessor dataStorageAccessor, IUserInput use
 
         return query.ToList();
     }
-    
-    public IEnumerable<T> GetOverdueTasks(Func<T, bool> isOverdueFunc)
-    {
-        return _storage.Values.Where(isOverdueFunc);
-    }
 
     public void Save(FileType fileType, bool append = false)
     {
-        _dataStorageAccessor.WriteData(fileType, _storage, append);
+        dataStorageAccessor.WriteData(fileType, _storage, append);
     }
     
     public bool ContainsID(string id)
