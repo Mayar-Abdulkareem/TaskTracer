@@ -4,19 +4,21 @@ using CsvHelper.Configuration;
 
 namespace TaskTracer.DataAccessor;
 
-public class FileStorageAccessor(string fileDirectoryPath) : IDataStorageAccessor
+public class FileStorageAccessor : IDataStorageAccessor
 {
-    private readonly string _fileDirectoryPath = fileDirectoryPath;
+    private readonly string _fileDirectoryPath = "../../../Files";
 
-    public Dictionary<string, T> LoadData<T>(FileType fileType)
+    public Dictionary<string, T> LoadData<T>(string filePath)
     {
-        var filePath = Path.Combine(_fileDirectoryPath, fileType.ToString() + ".csv");
-
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture);
+        Dictionary<string, T> dictionary;
+        
         using var reader = new StreamReader(filePath);
-        using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
+        using var csv = new CsvReader(reader, config);
+        csv.Context.RegisterClassMap<ToDoTaskMap>();
         var records = csv.GetRecords<T>().ToList();
-
-        var dictionary = records.ToDictionary(record =>
+        
+        dictionary = records.ToDictionary(record =>
         {
             var idProperty = typeof(T).GetProperty("ID");
             if (idProperty == null)
@@ -32,7 +34,31 @@ public class FileStorageAccessor(string fileDirectoryPath) : IDataStorageAccesso
 
             return idValue;
         });
-
         return dictionary;
+    }
+
+    public void WriteData<T>(FileType fileType, Dictionary<string, T> data, bool append = false)
+    {
+        var filePath = Path.Combine(_fileDirectoryPath, fileType.ToString() + ".csv");
+    
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            HasHeaderRecord = false,
+        };
+
+        using var writer = new StreamWriter(filePath, append: append);
+        using var csv = new CsvWriter(writer, config);
+        
+        if (!append || new FileInfo(filePath).Length == 0)
+        {
+            csv.WriteHeader<T>();
+            csv.NextRecord();
+        }
+    
+        foreach (var item in data.Values)
+        {
+            csv.WriteRecord(item);
+            csv.NextRecord();
+        }
     }
 }

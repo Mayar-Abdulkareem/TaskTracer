@@ -9,6 +9,29 @@
 
     <ItemGroup>
       <PackageReference Include="CsvHelper" Version="31.0.2" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="IValidator\**" />
+      <Compile Remove="Models\ITraceable.cs" />
+      <Compile Remove="ParsedCommand\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="IValidator\**" />
+      <EmbeddedResource Remove="ParsedCommand\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="IValidator\**" />
+      <None Update="Files\Projects.csv">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Files\ToDoTasks.csv">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Remove="ParsedCommand\**" />
     </ItemGroup>
 
 </Project>
